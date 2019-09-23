@@ -1,0 +1,53 @@
+#+TITLE: SuperPipe
+#+AUTHOR: Ashton Wiersdorf
+
+sup --- SuperPipe
+
+* Synopsis
+
+Usage: =sup=
+
+SuperPipe is a utility to define transformations on files. These transformations may be triggered regularly like a cron job or through file system events.
+
+This is a work in progress. See the [[id:BC7A7927-9189-4722-8020-A66050D09046][feature completion list]] for an overview of what has been done and what is left to do.
+
+** Command-line Options
+
+All commands are run with =sup= in front.
+
+ - =status=
+ - =config=
+ - =ls= List files currently being watched
+ - =add <pathname>= Add a file to the pipe
+ - =rm <pathname>=
+
+* Description
+
+SuperPipe lets you manage sets of files on which you define a set of arbitatry /transformations/ to occur when the file changes. A /transformation/ is just a set of commands to run, which may or may not actually have anything to do with the file the transformation is attached to. You could use this to keep a file in sync between different file systems (e.g. a file you need to keep up-to-date between [[https://dropbox.com][Dropbox]] and [[https://keybase.io/][Keybase]]) or to run [[pandoc.org][Pandoc]] on a file to publish as a blog.
+
+** Feature Completion List
+  :PROPERTIES:
+  :ID:       BC7A7927-9189-4722-8020-A66050D09046
+  :END:
+
+| Status | Feature                            | Notes |
+|--------+------------------------------------+-------|
+| TODO   | CRUD paths to manage               |       |
+| TODO   | Add file system watcher            |       |
+| TODO   | Add cron-like support              |       |
+| TODO   | Add round-trip detection           |       |
+| TODO   | Use git to resolve merge conflicts |       |
+
+* Documentation
+
+(None so far)
+
+* Open Tasks
+
+** TODO CRUD paths
+
+* General Notes
+
+** 2019-09-23
+
+I think it would be cool if I could add some grantees to the program: what if I could make sure everything that happened was atomic? Maybe I say that all the commands run in a particular sandbox (e.g. in a directory with only the file in question present) than then run, then they define what products from the transformation they want to extract and put elsewhere. If any point of the pipeline fails, then they can roll it back.
