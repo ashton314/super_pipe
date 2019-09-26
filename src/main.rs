@@ -1,18 +1,30 @@
+use std::path::PathBuf;
 use structopt::StructOpt;
-use super_pipe;
+// use super_pipe as sup;
 
-// Setup command line argument options
-#[derive(StructOpt)]
-struct Cli {
-    command: String,
-    #[structopt(parse(from_os_str))]
-    path: std::path::PathBuf
+#[derive(Debug, StructOpt)]
+#[structopt(about = "Super Pipelines for your filesystem")]
+enum Sup {
+    /// Add a path watcher
+    Add {
+        #[structopt(parse(from_os_str))]
+        path: PathBuf,
+        commands: Vec<String>
+    },
+    /// Manually fire all (or one if specified) pipelines
+    Run {
+        #[structopt(parse(from_os_str))]
+        path: Option<PathBuf>
+    },
+    /// Remove a pipeline
+    Delete {
+        #[structopt(parse(from_os_str))]
+        path: PathBuf,
+    }
 }
 
 fn main() {
-    println!("Hello, world!");
-    let args = Cli::from_args();
-    println!("Command: {}", args.command);
-    println!("Path: {:?}", args.path);
-    super_pipe::foo();
+    let opt = Sup::from_args();
+    println!("{:?}", opt);
 }
+
