@@ -1,4 +1,5 @@
 use structopt::StructOpt;
+use super_pipe;
 
 // Setup command line argument options
 #[derive(StructOpt)]
@@ -13,4 +14,5 @@ fn main() {
     let args = Cli::from_args();
     println!("Command: {}", args.command);
     println!("Path: {:?}", args.path);
+    super_pipe::foo();
 }
