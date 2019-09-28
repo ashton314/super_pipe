@@ -53,6 +53,9 @@ fn main() {
         Sup::Add { path, commands: cmds } => {
             sup::add_path(path, cmds)
         },
+        Sup::Delete { path } => {
+            sup::delete_path(path)
+        },
         Sup::List => sup::list_paths(),
         _ => panic!("Unmatched pattern: {:?}", opt)
     };

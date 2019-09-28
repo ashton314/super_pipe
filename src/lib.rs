@@ -9,3 +9,8 @@ pub fn list_paths() {
     println!("Known paths:");
     store::list_paths();
 }
+
+pub fn delete_path(path: std::path::PathBuf) {
+    println!("Deleting path {:?}", path);
+    store::delete_path(path);
+}
