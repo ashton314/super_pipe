@@ -40,11 +40,28 @@ SuperPipe lets you manage sets of files on which you define a set of arbitatry /
 
 * Documentation
 
-(None so far)
+** Config File
+
+*NOTE*: As of 2019-09-28 there are no config file mechanisms. Please see [[id:8C464D3F-E83E-4E1A-8799-4578F63BE69F][Add config file system]] for a better description. What you see below is a list of things to add configuration options for
+
+*** To add
+
+ - Where put the database
+ - Use a SQLite database or a flat file system
 
 * Open Tasks
 
-** TODO CRUD paths
+** IN_PROGRESS CRUD paths
+   :LOGBOOK:
+   - State "IN_PROGRESS" from "TODO"       [2019-09-28 Sat 20:19]
+   :END:
+
+** TODO Add config file system
+   :PROPERTIES:
+   :ID:       8C464D3F-E83E-4E1A-8799-4578F63BE69F
+   :END:
+
+** TODO Weigh benefits of 
 
 * General Notes
 

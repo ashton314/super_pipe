@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 use structopt::StructOpt;
 use super_pipe as sup;
+use sup::store as store;
 
 #[derive(Debug, StructOpt)]
 #[structopt(about = "Super Pipelines for your filesystem")]
@@ -21,6 +22,8 @@ enum Sup {
         #[structopt(parse(from_os_str))]
         path: PathBuf,
     },
+    /// List all paths and pipelines
+    List,
     /// Configure super pipe
     Config(Config)
 }
@@ -42,17 +45,15 @@ enum Config {
 
 fn main() {
     let opt = Sup::from_args();
-    println!("{:?}", opt);
+
+    store::init();
 
     // Dispatch on the sub-commands
-    let foo = 
-        match opt {
-            Sup::Add { path, commands: cmds } => {
-                println!("Path: {:?}", path);
-                println!("Commands: {:?}", cmds);
-                1
-            },
-            _ => 2
-        };
-    println!("{}", foo);
+    match opt {
+        Sup::Add { path, commands: cmds } => {
+            sup::add_path(path, cmds)
+        },
+        Sup::List => sup::list_paths(),
+        _ => panic!("Unmatched pattern: {:?}", opt)
+    };
 }
