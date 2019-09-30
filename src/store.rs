@@ -29,21 +29,68 @@ pub fn init() {
     ).expect("Could not create table in database");
 }
 
-pub fn add_path(path: PathBuf, commands: Vec<String>) {
+pub enum IoDbError {
+    Io(std::io::Error),
+    Db(rusqlite::Error)
+}
+
+impl std::fmt::Display for IoDbError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match *self {
+            IoDbError::Io(ref err) => err.fmt(f),
+            IoDbError::Db(ref err) => err.fmt(f)
+        }
+    }
+}
+
+// FIXME: This is not a good implementation for fmt::Debug, but I'll do for now
+impl std::fmt::Debug for IoDbError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match *self {
+            IoDbError::Io(ref err) => err.fmt(f),
+            IoDbError::Db(ref err) => err.fmt(f)
+        }
+    }
+}
+
+impl std::error::Error for IoDbError {
+    fn description(&self) -> &str {
+        match *self {
+            IoDbError::Io(ref err) => err.description(),
+            IoDbError::Db(ref err) => err.description()
+        }
+    }
+}
+
+impl From<std::io::Error> for IoDbError {
+    fn from(err: std::io::Error) -> IoDbError {
+        IoDbError::Io(err)
+    }
+}
+impl From<rusqlite::Error> for IoDbError {
+    fn from(err: rusqlite::Error) -> IoDbError {
+        IoDbError::Db(err)
+    }
+}
+impl From<serde_json::Error> for IoDbError {
+    fn from(err: serde_json::Error) -> IoDbError {
+        IoDbError::Io(std::io::Error::from(err))
+    }
+}
+
+pub fn add_path<'a>(path: PathBuf, commands: Vec<String>) -> Result<&'a str, IoDbError> {
     // TODO: Add timestamps
     let path = path.to_str().expect("Could not convert path into string");
 
     let dbf: String = String::from("/Users/ashton/.sup/files.db");
-    let conn = Connection::open(dbf)
-        .expect("Could not open files.db for some reason.");
-    let cmds = json::to_string(&commands)
-        .expect("Unable to serialize command list");
+    let conn = Connection::open(dbf)?;
+    let cmds = json::to_string(&commands)?;
 
     conn.execute("INSERT INTO files (path, commands) VALUES (?1, ?2)",
-                 &[path, cmds.as_str()])
-        .expect("Unable to insert into database");
+                 &[path, cmds.as_str()])?;
     
     println!("Pipeline for {} inserted", path);
+    Ok("Pipeline inserted")
 }
 
 pub fn delete_path(path: PathBuf) {
