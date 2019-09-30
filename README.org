@@ -23,20 +23,20 @@ All commands are run with =sup= in front.
 
 * Description
 
-SuperPipe lets you manage sets of files on which you define a set of arbitatry /transformations/ to occur when the file changes. A /transformation/ is just a set of commands to run, which may or may not actually have anything to do with the file the transformation is attached to. You could use this to keep a file in sync between different file systems (e.g. a file you need to keep up-to-date between [[https://dropbox.com][Dropbox]] and [[https://keybase.io/][Keybase]]) or to run [[pandoc.org][Pandoc]] on a file to publish as a blog.
+SuperPipe lets you manage sets of files on which you define a set of arbitrary /transformations/ to occur when the file changes. A /transformation/ is just a set of commands to run, which may or may not actually have anything to do with the file the transformation is attached to. You could use this to keep a file in sync between different file systems (e.g. a file you need to keep up-to-date between [[https://dropbox.com][Dropbox]] and [[https://keybase.io/][Keybase]]) or to run [[pandoc.org][Pandoc]] on a file to publish as a blog.
 
 ** Feature Completion List
   :PROPERTIES:
   :ID:       BC7A7927-9189-4722-8020-A66050D09046
   :END:
 
-| Status | Feature                            | Notes |
-|--------+------------------------------------+-------|
-| TODO   | CRUD paths to manage               |       |
-| TODO   | Add file system watcher            |       |
-| TODO   | Add cron-like support              |       |
-| TODO   | Add round-trip detection           |       |
-| TODO   | Use git to resolve merge conflicts |       |
+| Status      | Feature                            | Notes                             |
+|-------------+------------------------------------+-----------------------------------|
+| IN PROGRESS | CRUD paths to manage               |                                   |
+| TODO        | Add file system watcher            |                                   |
+| TODO        | Add cron-like support              |                                   |
+| TODO        | Add round-trip detection           | This might become its own command |
+| TODO        | Use git to resolve merge conflicts |                                   |
 
 * Documentation
 
@@ -48,6 +48,37 @@ SuperPipe lets you manage sets of files on which you define a set of arbitatry /
 
  - Where put the database
  - Use a SQLite database or a flat file system
+
+
+** Command Line Interface
+
+*** Commands
+
+**** =add <file> ["command" ...]=
+
+Add a file to the list of files to watch.
+
+The commands will have the name of the file inserted into the =$SUP_1= variable. You *will* need to escape it. For example, when wanting to copy my .emacs file from my home directory to Keybase, I would do:
+
+#+BEGIN_SRC bash
+
+  $ sup add ~/.emacs "cp \$SUP_1 /keybase/private/ashton314,.../"
+
+#+END_SRC
+
+Note that each path uniquely identifies the pipeline. The program will not allow you to add multiple pipelines with the same name.
+
+**** =list=
+
+List all pipes and their associated commands.
+
+**** =delete <file>=
+
+Delete a path.
+
+**** TODO =sync <file1> <file2>=
+
+This will set up to keep two files in sync. Right now, I'm thinking I'll use a git repository to keep the files synchronized, handle merging, etc. I'll need a way to fail automatically, however.
 
 * Open Tasks
 
@@ -61,10 +92,18 @@ SuperPipe lets you manage sets of files on which you define a set of arbitatry /
    :ID:       8C464D3F-E83E-4E1A-8799-4578F63BE69F
    :END:
 
-** TODO Weigh benefits of 
+** TODO Weigh benefits of using SQLite over plain files
+
+| SQLite advantages      | Plain-text file advantages                        |
+|------------------------+---------------------------------------------------|
+| Rare format corruption | Don't need another dependency[fn:1]               |
+| No tricky parsing      | Easier to parse than working with an SQL database |
 
 * General Notes
-
 ** 2019-09-23
 
 I think it would be cool if I could add some grantees to the program: what if I could make sure everything that happened was atomic? Maybe I say that all the commands run in a particular sandbox (e.g. in a directory with only the file in question present) than then run, then they define what products from the transformation they want to extract and put elsewhere. If any point of the pipeline fails, then they can roll it back.
+
+* Footnotes
+
+[fn:1] Though if I'm targeting macOS, it's already there. Should also come on most Linux distros/be really easy to install
