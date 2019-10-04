@@ -82,6 +82,10 @@ This will set up to keep two files in sync. Right now, I'm thinking I'll use a g
 
 * Open Tasks
 
+** TODO Operations need to operate on pipe ID, not on file name
+
+I just thought of a use case for two pipelines with one file: one task runs every time a file changes, another happens daily. Same file, two different pipelines.
+
 ** IN_PROGRESS CRUD paths
    :LOGBOOK:
    - State "IN_PROGRESS" from "TODO"       [2019-09-28 Sat 20:19]
