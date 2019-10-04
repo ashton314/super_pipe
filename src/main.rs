@@ -19,8 +19,7 @@ enum Sup {
     },
     /// Remove a pipeline
     Delete {
-        #[structopt(parse(from_os_str))]
-        path: PathBuf,
+        id: u32,
     },
     /// List all paths and pipelines
     List,
@@ -53,8 +52,8 @@ fn main() {
         Sup::Add { path, commands: cmds } => {
             sup::add_path(path, cmds)
         },
-        Sup::Delete { path } => {
-            sup::delete_path(path)
+        Sup::Delete { id } => {
+            sup::delete_pipe(id)
         },
         Sup::List => sup::list_paths(),
         _ => panic!("Unmatched pattern: {:?}", opt)

@@ -9,6 +9,7 @@ use std::path::PathBuf;
 
 #[derive(Debug)]
 pub struct FileEntry {
+    id: u32,
     // path: &'a Path,
     path: String,
     cmds: Vec<String>
@@ -93,14 +94,12 @@ pub fn add_path<'a>(path: PathBuf, commands: Vec<String>) -> Result<&'a str, IoD
     Ok("Pipeline inserted")
 }
 
-pub fn delete_path(path: PathBuf) {
-    let path = path.to_str().expect("Could not convert path into string");
-
+pub fn delete_path(id: u32) {
     let dbf: String = String::from("/Users/ashton/.sup/files.db");
     let conn = Connection::open(&dbf)
         .expect("Could not open files.db for some reason.");
 
-    conn.execute("DELETE FROM files WHERE path = ?1", &[path])
+    conn.execute("DELETE FROM files WHERE id = ?1", &[id])
         .expect("Could not delete path from database");
 }
 
@@ -109,20 +108,21 @@ pub fn list_paths() {
     let conn = Connection::open(&dbf)
         .expect("Could not open files.db for some reason.");
 
-    let mut stmt = conn.prepare("SELECT path, commands FROM files;")
+    let mut stmt = conn.prepare("SELECT id, path, commands FROM files;")
         .expect("Couldn't prepare statement");
 
     let paths = stmt.query_map(NO_PARAMS, |row| {
-        let path: String = row.get(0).expect("Couldn't fetch first param");
-        let cmds: String = row.get(1).expect("Couldn't fetch first param");
-        Ok(FileEntry { path, cmds: json::from_str(cmds.as_str()).expect("Couldn't parse commands") })
+	let id: u32 = row.get(0).expect("Couldn't fetch ID");
+        let path: String = row.get(1).expect("Couldn't fetch first param");
+        let cmds: String = row.get(2).expect("Couldn't fetch first param");
+        Ok(FileEntry { id, path, cmds: json::from_str(cmds.as_str()).expect("Couldn't parse commands") })
     })
         .expect("Could not list rows");
 
     for path in paths {
         match path {
-            Ok(FileEntry {path, cmds}) => {
-                println!("{}: {:?}", path, cmds);
+            Ok(FileEntry {id, path, cmds}) => {
+                println!("{}\t{}\t{:?}", id, path, cmds);
             },
             Err(_) => panic!("Got something that wasn't OK")
         }

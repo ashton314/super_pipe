@@ -19,7 +19,7 @@ pub fn list_paths() {
     store::list_paths();
 }
 
-pub fn delete_path(path: std::path::PathBuf) {
-    println!("Deleting path {:?}", path);
-    store::delete_path(path);
+pub fn delete_pipe(id: u32) {
+    println!("Deleting path {:?}", id);
+    store::delete_path(id);
 }
