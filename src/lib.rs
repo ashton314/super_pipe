@@ -16,10 +16,25 @@ pub fn add_path(path: std::path::PathBuf, cmds: Vec<String>) {
 
 pub fn list_paths() {
     println!("Known paths:");
-    store::list_paths();
+    let paths = store::list_paths()
+	.expect("Was not able to get a list of paths for some reason.");
+
+    for path in paths {
+	match path {
+	    Ok(store::FileEntry {id, path, cmds}) => println!("{}\t{}\t{:?}", id, path, cmds),
+	    Err(e) => println!("Could not display path: {:?}", e)
+	};
+    }
 }
 
 pub fn delete_pipe(id: u32) {
     println!("Deleting path {:?}", id);
     store::delete_path(id);
+}
+
+pub fn run_pipeline(id: u32) {
+    let pipe = store::fetch_pipeline(id)
+	.expect("Unable to fetch pipeline details");
+
+    println!("Pipe: {:?}", pipe);
 }
