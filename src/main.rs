@@ -6,6 +6,8 @@ use sup::store as store;
 #[derive(Debug, StructOpt)]
 #[structopt(about = "Super Pipelines for your filesystem")]
 enum Sup {
+    /// Ensure config files are in place
+    Init,
     /// Add a path watcher
     Add {
         #[structopt(parse(from_os_str))]
@@ -49,6 +51,9 @@ fn main() {
 
     // Dispatch on the sub-commands
     match opt {
+        Sup::Init => {
+            panic!("Don't know how to resolve the home directory")
+        },
         Sup::Add { path, commands: cmds } => {
             sup::add_path(path, cmds)
         },

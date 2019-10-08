@@ -1,5 +1,6 @@
 extern crate rusqlite;
 extern crate serde_json;
+extern crate dirs;
 
 // use rusqlite::{Connection, Result};
 use rusqlite::Connection;
@@ -15,11 +16,26 @@ pub struct FileEntry {
     pub cmds: Vec<String>
 }
 
+pub fn conf_dir() -> PathBuf {
+    dirs::config_dir().expect("Can't find user's configuration directory.")
+}
+
+pub fn db_path() -> PathBuf {
+    let mut path = conf_dir();
+    path.push("super_pipe");
+    path.push("files");
+    path.set_extension("db");
+    path
+}
+
+pub fn db_conn() -> rusqlite::Connection {
+    let dbf: String = String::from(db_path().into_os_string().into_string().expect("Unsupported OS type---don't know how to deal with your pathname."));
+    Connection::open(dbf).expect("Could not open files.db for some reason.")
+}
+
 /// Ensure that there is a database
 pub fn init() {
-    let dbf: String = String::from("/Users/ashton/.sup/files.db");
-    let conn = Connection::open(dbf).expect("Could not open files.db for some reason.");
-
+    let conn = db_conn();
     conn.execute(
         "create table if not exists files (
              id integer primary key,
@@ -83,8 +99,7 @@ pub fn add_path<'a>(path: PathBuf, commands: Vec<String>) -> Result<&'a str, IoD
     // TODO: Add timestamps
     let path = path.to_str().expect("Could not convert path into string");
 
-    let dbf: String = String::from("/Users/ashton/.sup/files.db");
-    let conn = Connection::open(dbf)?;
+    let conn = db_conn();
     let cmds = json::to_string(&commands)?;
 
     conn.execute("INSERT INTO files (path, commands) VALUES (?1, ?2)",
@@ -95,19 +110,14 @@ pub fn add_path<'a>(path: PathBuf, commands: Vec<String>) -> Result<&'a str, IoD
 }
 
 pub fn delete_path(id: u32) {
-    let dbf: String = String::from("/Users/ashton/.sup/files.db");
-    let conn = Connection::open(&dbf)
-        .expect("Could not open files.db for some reason.");
+    let conn = db_conn();
 
     conn.execute("DELETE FROM files WHERE id = ?1", &[id])
         .expect("Could not delete path from database");
 }
 
 pub fn fetch_pipeline(id: u32) -> Result<FileEntry, IoDbError> {
-    let dbf: String = String::from("/Users/ashton/.sup/files.db");
-    let conn = Connection::open(&dbf)
-        .expect("Could not open files.db for some reason.");
-
+    let conn = db_conn();
     let mut stmt = conn.prepare("SELECT id, path, commands FROM files WHERE id = ?1;")
         .expect("Couldn't prepare statement");
 
@@ -122,10 +132,7 @@ pub fn fetch_pipeline(id: u32) -> Result<FileEntry, IoDbError> {
 }
 
 pub fn list_paths<'a>() -> Result<Vec<Result<FileEntry, &'a str>>, &'a str> {
-    let dbf: String = String::from("/Users/ashton/.sup/files.db");
-    let conn = Connection::open(&dbf)
-        .expect("Could not open files.db for some reason.");
-
+    let conn = db_conn();
     let mut stmt = conn.prepare("SELECT id, path, commands FROM files;")
         .expect("Couldn't prepare statement");
 
