@@ -7,6 +7,7 @@ use rusqlite::Connection;
 use rusqlite::NO_PARAMS;
 use serde_json as json;
 use std::path::PathBuf;
+use std::fs;
 
 #[derive(Debug)]
 pub struct FileEntry {
@@ -17,12 +18,13 @@ pub struct FileEntry {
 }
 
 pub fn conf_dir() -> PathBuf {
-    dirs::config_dir().expect("Can't find user's configuration directory.")
+    let mut path = dirs::config_dir().expect("Can't find user's configuration directory.");
+    path.push("super_pipe");
+    path
 }
 
 pub fn db_path() -> PathBuf {
     let mut path = conf_dir();
-    path.push("super_pipe");
     path.push("files");
     path.set_extension("db");
     path
@@ -31,6 +33,20 @@ pub fn db_path() -> PathBuf {
 pub fn db_conn() -> rusqlite::Connection {
     let dbf: String = String::from(db_path().into_os_string().into_string().expect("Unsupported OS type---don't know how to deal with your pathname."));
     Connection::open(dbf).expect("Could not open files.db for some reason.")
+}
+
+/// Makes sure that there is a database available
+pub fn ensure_has_database() {
+    let conf = conf_dir();
+    let dbf  = db_path();
+    if ! conf.exists() {
+        fs::create_dir(&conf)
+            .expect(format!("Could not create directory {:?} for some reason.", conf).as_str());
+    }
+    if ! dbf.exists() {
+        fs::File::create(&dbf)
+            .expect(format!("Could not create new db at {:?} for some reason", dbf).as_str());
+    }
 }
 
 /// Ensure that there is a database

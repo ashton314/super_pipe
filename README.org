@@ -15,15 +15,21 @@ This is a work in progress. See the [[id:BC7A7927-9189-4722-8020-A66050D09046][f
 
 All commands are run with =sup= in front.
 
- - =status=
- - =config=
- - =ls= List files currently being watched
- - =add <pathname>= Add a file to the pipe
- - =rm <pathname>=
+ - =init= Ensures configuration files are set up properly
+ - =status= *WIP*
+ - =config= *WIP*
+ - =add <pathname>= Add a pipeline with a watched file
+ - =delete <id>= Remove a pipeline
+ - =list= List files currently being watched
+ - =sync <path1> <path2>= Keep two files sync'd. Uses Git's merge algorithm to resolve differences.
+ - =lens <path1> [cmds ...] --path2 <path2> [cmds ...]= *WIP* Create a round-trip transformation preserving pipeline
+ - =run [id]= *WIP* Manually fire off a pipeline (or all pipelines)
 
 * Description
 
 SuperPipe lets you manage sets of files on which you define a set of arbitrary /transformations/ to occur when the file changes. A /transformation/ is just a set of commands to run, which may or may not actually have anything to do with the file the transformation is attached to. You could use this to keep a file in sync between different file systems (e.g. a file you need to keep up-to-date between [[https://dropbox.com][Dropbox]] and [[https://keybase.io/][Keybase]]) or to run [[pandoc.org][Pandoc]] on a file to publish as a blog.
+
+SuperPipe does keep state (right now using a SQLite database), so you will need to run =sup init= before running any further commands.
 
 ** Feature Completion List
   :PROPERTIES:
@@ -49,7 +55,6 @@ SuperPipe lets you manage sets of files on which you define a set of arbitrary /
  - Where put the database
  - Use a SQLite database or a flat file system
 
-
 ** Command Line Interface
 
 *** Commands
@@ -72,9 +77,9 @@ Note that each path uniquely identifies the pipeline. The program will not allow
 
 List all pipes and their associated commands.
 
-**** =delete <file>=
+**** =delete <id>=
 
-Delete a path.
+Delete a pipeline.
 
 **** TODO =sync <file1> <file2>=
 
@@ -95,9 +100,13 @@ I just thought of a use case for two pipelines with one file: one task runs ever
    - State "IN_PROGRESS" from "TODO"       [2019-09-28 Sat 20:19]
    :END:
 
-** TODO Add config file system
+** DONE Add config file system
+   CLOSED: [2019-10-10 Do 13:52]
    :PROPERTIES:
    :ID:       8C464D3F-E83E-4E1A-8799-4578F63BE69F
+   :END:
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2019-10-10 Do 13:52]
    :END:
 
 ** TODO Weigh benefits of using SQLite over plain files

@@ -47,12 +47,15 @@ enum Config {
 fn main() {
     let opt = Sup::from_args();
 
-    store::init();
+    // TODO: add pre-flight check
 
     // Dispatch on the sub-commands
     match opt {
         Sup::Init => {
-            panic!("Don't know how to resolve the home directory")
+            print!("Initilizing super pipe... ");
+            store::ensure_has_database();
+            store::init();
+            println!("done.")
         },
         Sup::Add { path, commands: cmds } => {
             sup::add_path(path, cmds)
