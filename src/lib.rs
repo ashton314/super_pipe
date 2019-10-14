@@ -46,16 +46,13 @@ pub fn run_pipeline(id: u32) {
     let mut fh = fs::File::create("/tmp/sup_cmd")
         .expect("Couldn't open tmp cmd file");
 
-    for {
+    for cmd in pipe.cmds.iter() {
+	write!(fh, "{}", cmd).unwrap();
     }
-    pipe.cmds.iter().map(|cmd| {
-        write!(fh, "{}", cmd);
-    });
 
-    let output = Command::new("whoami")
-        // .env("SUP_SRC", pipe.path)
-        // .args(&["echo", "hello world"])
-        // .args(&pipe.cmds)
+    let output = Command::new("bash")
+        .env("SUP_SRC", pipe.path)
+	.args(&["/tmp/sup_cmd"])
         .output()
         .expect("Failed to execute process");
 
