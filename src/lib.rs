@@ -1,8 +1,6 @@
 pub mod store;
 use std::process::Command;
-use std::str;
-// use std::path;
-use std::fs;
+use std::{str,fs};
 use std::io::Write;
 
 pub fn add_path(path: std::path::PathBuf, cmds: Vec<String>) {
@@ -26,7 +24,7 @@ pub fn list_paths() {
 
     for path in paths {
 	match path {
-	    Ok(store::FileEntry {id, path, cmds}) => println!("{}\t{}\t{:?}", id, path, cmds),
+	    Ok(store::FileEntry {id, path, pipes}) => println!("{}\t{}\t{:?}", id, path, cmds),
 	    Err(e) => println!("Could not display path: {:?}", e)
 	};
     }
@@ -46,7 +44,7 @@ pub fn run_pipeline(id: u32) {
     let mut fh = fs::File::create("/tmp/sup_cmd")
         .expect("Couldn't open tmp cmd file");
 
-    for cmd in pipe.cmds.iter() {
+    for cmd in pipe.pipes.iter() {
 	write!(fh, "{}", cmd).unwrap();
     }
 

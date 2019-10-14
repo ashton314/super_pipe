@@ -1,10 +1,6 @@
-extern crate rusqlite;
 extern crate serde_json;
 extern crate dirs;
 
-// use rusqlite::{Connection, Result};
-use rusqlite::Connection;
-use rusqlite::NO_PARAMS;
 use serde_json as json;
 use std::path::PathBuf;
 use std::fs;
@@ -12,9 +8,8 @@ use std::fs;
 #[derive(Debug)]
 pub struct FileEntry {
     pub id: u32,
-    // path: &'a Path,
     pub path: String,
-    pub cmds: Vec<String>
+    pub pipes: Vec<String>
 }
 
 pub fn conf_dir() -> PathBuf {
@@ -23,43 +18,30 @@ pub fn conf_dir() -> PathBuf {
     path
 }
 
-pub fn db_path() -> PathBuf {
+pub fn pipe_map_path() -> PathBuf {
     let mut path = conf_dir();
     path.push("files");
-    path.set_extension("db");
+    path.set_extension("toml");
     path
 }
 
-pub fn db_conn() -> rusqlite::Connection {
-    let dbf: String = String::from(db_path().into_os_string().into_string().expect("Unsupported OS type---don't know how to deal with your pathname."));
-    Connection::open(dbf).expect("Could not open files.db for some reason.")
-}
-
-/// Makes sure that there is a database available
+/// Makes sure that there is a file store available
 pub fn ensure_has_database() {
     let conf = conf_dir();
-    let dbf  = db_path();
+    let fmp  = pipe_map_path();
     if ! conf.exists() {
         fs::create_dir(&conf)
             .expect(format!("Could not create directory {:?} for some reason.", conf).as_str());
     }
-    if ! dbf.exists() {
-        fs::File::create(&dbf)
-            .expect(format!("Could not create new db at {:?} for some reason", dbf).as_str());
+    if ! fmp.exists() {
+        fs::File::create(&fmp)
+            .expect(format!("Could not create new file map path at {:?} for some eason", fmp).as_str());
     }
 }
 
 /// Ensure that there is a database
 pub fn init() {
-    let conn = db_conn();
-    conn.execute(
-        "create table if not exists files (
-             id integer primary key,
-             path text not null unique,
-             commands text null
-         )",
-        NO_PARAMS,
-    ).expect("Could not create table in database");
+    // FIXME: Add TOML init here
 }
 
 pub enum IoDbError {
@@ -142,7 +124,7 @@ pub fn fetch_pipeline(id: u32) -> Result<FileEntry, IoDbError> {
 	Ok(FileEntry {
 	    id: row.get(0)?,
 	    path: row.get(1)?,
-	    cmds: json::from_str(cmds.as_str()).expect("Malformed JSON in result row: I can't convert the types well enough to recover. ¯\\_(ツ)_/¯")
+	    pipes: json::from_str(cmds.as_str()).expect("Malformed JSON in result row: I can't convert the types well enough to recover. ¯\\_(ツ)_/¯")
 	})
     })?)
 }
@@ -157,7 +139,7 @@ pub fn list_paths<'a>() -> Result<Vec<Result<FileEntry, &'a str>>, &'a str> {
 	let id: u32 = row.get(0).expect("Couldn't fetch ID");
         let path: String = row.get(1).expect("Couldn't fetch first param");
         let cmds: String = row.get(2).expect("Couldn't fetch first param");
-        Ok(FileEntry { id, path, cmds: json::from_str(cmds.as_str()).expect("Couldn't parse commands") })
+        Ok(FileEntry { id, path, pipes: json::from_str(cmds.as_str()).expect("Couldn't parse commands") })
     }).expect("Couldn't retrieve rows!");
 
     let mut ret = Vec::new();

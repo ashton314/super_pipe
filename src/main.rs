@@ -9,10 +9,14 @@ enum Sup {
     /// Ensure config files are in place
     Init,
     /// Add a path watcher
-    Add {
+    Add_path {
         #[structopt(parse(from_os_str))]
         path: PathBuf,
-        commands: Vec<String>
+        pipelines: Vec<String>
+    },
+    /// Add a new pipeline. <name> should be a unique name to give this pipeline. This program then reads from STDIN and saves it to a file. You can then 
+    Add_pipeline {
+	name: String
     },
     /// Manually fire all (or one if specified) pipelines
     Run {
@@ -22,10 +26,18 @@ enum Sup {
     Delete {
         id: u32
     },
-    /// List all paths and pipelines
-    List,
+    /// List paths and pipelines
+    List(PathPipe),
     /// Configure super pipe
     Config(Config)
+}
+
+#[derive(Debug, StructOpt)]
+enum PathPipe {
+    /// Display paths and their associated pipelines
+    Paths,
+    /// Display pipelines
+    Pipelines
 }
 
 #[derive(Debug, StructOpt)]
