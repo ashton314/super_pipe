@@ -1,4 +1,6 @@
 pub mod store;
+use std::process::Command;
+use std::str;
 
 pub fn add_path(path: std::path::PathBuf, cmds: Vec<String>) {
     println!("Adding path: {:?}, cmds: {:?}", path, cmds);
@@ -37,4 +39,16 @@ pub fn run_pipeline(id: u32) {
 	.expect("Unable to fetch pipeline details");
 
     println!("Pipe: {:?}", pipe);
+
+    let output = Command::new("eval")
+        .env("SUP_SRC", pipe.path)
+        .args(&pipe.cmds)
+        .output()
+        .expect("Failed to execute process");
+
+    println!("STDOUT: {:?}\nSTDERR: {:?}",
+             str::from_utf8(&output.stdout).unwrap(),
+             str::from_utf8(&output.stderr).unwrap());
+
+    println!("Finished running");
 }

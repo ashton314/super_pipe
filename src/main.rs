@@ -16,12 +16,11 @@ enum Sup {
     },
     /// Manually fire all (or one if specified) pipelines
     Run {
-        #[structopt(parse(from_os_str))]
-        path: Option<PathBuf>
+        id: Option<u32>
     },
     /// Remove a pipeline
     Delete {
-        id: u32,
+        id: u32
     },
     /// List all paths and pipelines
     List,
@@ -56,6 +55,12 @@ fn main() {
             store::ensure_has_database();
             store::init();
             println!("done.")
+        },
+        Sup::Run { id } => {
+            match id {
+                Some(num) => sup::run_pipeline(num),
+                None => println!("Run all pipelines not implemented yet!")
+            }
         },
         Sup::Add { path, commands: cmds } => {
             sup::add_path(path, cmds)
