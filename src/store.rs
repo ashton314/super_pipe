@@ -2,7 +2,7 @@ extern crate serde_json;
 extern crate dirs;
 
 use serde_json as json;
-use std::path::PathBuf;
+use std::path::{Path,PathBuf};
 use std::fs;
 
 #[derive(Debug)]
@@ -11,6 +11,14 @@ pub struct FileEntry {
     pub path: String,
     pub pipes: Vec<String>
 }
+
+#[derive(Debug)]
+pub struct PipelineRecord {
+    pub id: u32,
+    pub checksum: String,
+    pub source: Path
+}
+
 
 pub fn conf_dir() -> PathBuf {
     let mut path = dirs::config_dir().expect("Can't find user's configuration directory.");
