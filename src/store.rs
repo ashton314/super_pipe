@@ -20,8 +20,7 @@ pub struct PipelineRecord {
     pub source: PathBuf
 }
 
-
-
+/// Return the root of the directory that we can own
 pub fn conf_dir() -> PathBuf {
     let mut path = dirs::config_dir()
         .expect("Can't find user's configuration directory.");
@@ -123,3 +122,13 @@ pub fn list_pipelines() -> Result<Vec<PipelineRecord>, IoDbError> {
 // pub fn fetch_pipeline(id: u32) -> Result<FileEntry, IoDbError>
 
 // pub fn list_paths<'a>() -> Result<Vec<Result<FileEntry, &'a str>>, &'a str>
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn setup_works() {
+        ensure_has_database();
+        assert!(pipes_dir().exists(), "Directory for pipes was not created!");
+    }
+}
