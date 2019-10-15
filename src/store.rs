@@ -5,6 +5,13 @@ extern crate dirs;
 use serde::{Serialize, Deserialize};
 use std::path::PathBuf;
 use std::fs;
+use std::io::prelude::*;
+// use toml::Value;
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct FilesStore {
+    files: Vec<FileEntry>
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FileEntry {
@@ -68,14 +75,14 @@ pub fn init() {
 
 pub enum IoDbError {
     Io(std::io::Error),
-//    Db(rusqlite::Error)
+    Db(toml::de::Error)
 }
 
 impl std::fmt::Display for IoDbError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match *self {
-            IoDbError::Io(ref err) => err.fmt(f)
-//            IoDbError::Db(ref err) => err.fmt(f)
+            IoDbError::Io(ref err) => err.fmt(f),
+            IoDbError::Db(ref err) => err.fmt(f)
         }
     }
 }
@@ -84,8 +91,8 @@ impl std::fmt::Display for IoDbError {
 impl std::fmt::Debug for IoDbError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match *self {
-            IoDbError::Io(ref err) => err.fmt(f)
-//            IoDbError::Db(ref err) => err.fmt(f)
+            IoDbError::Io(ref err) => err.fmt(f),
+            IoDbError::Db(ref err) => err.fmt(f)
         }
     }
 }
@@ -93,9 +100,15 @@ impl std::fmt::Debug for IoDbError {
 impl std::error::Error for IoDbError {
     fn description(&self) -> &str {
         match *self {
-            IoDbError::Io(ref err) => err.description()
-            // IoDbError::Db(ref err) => err.description()
+            IoDbError::Io(ref err) => err.description(),
+            IoDbError::Db(ref err) => err.description()
         }
+    }
+}
+
+impl From<toml::de::Error> for IoDbError {
+    fn from(err: toml::de::Error) -> IoDbError {
+        IoDbError::Db(err)
     }
 }
 
@@ -105,9 +118,16 @@ impl From<std::io::Error> for IoDbError {
     }
 }
 
+pub fn read_files_file(file: PathBuf) -> Result<FilesStore, IoDbError> {
+    let mut fh = fs::File::open(file)?;
+    let mut contents = String::new();
+    fh.read_to_string(&mut contents)?;
+    let file: FilesStore = toml::from_str(contents.as_str())?;
+    Ok(file)
+}
+
 pub fn list_paths() -> Result<Vec<FileEntry>, IoDbError> {
-    let paths: Vec<FileEntry> = Vec::new();
-    Ok(paths)
+    Ok(read_files_file(pipe_map_path())?.files)
 }
 
 pub fn list_pipelines() -> Result<Vec<PipelineRecord>, IoDbError> {
@@ -115,7 +135,9 @@ pub fn list_pipelines() -> Result<Vec<PipelineRecord>, IoDbError> {
     Ok(pipes)
 }
 
-//pub fn add_path<'a>(path: PathBuf, commands: Vec<String>) -> Result<&'a str, IoDbError>
+// pub fn add_path(path: PathBuf, pipelines: Vec<String>) -> Result<(), IoDbError> {
+//     let file = 
+// }
 
 // pub fn delete_path(id: u32)
 
