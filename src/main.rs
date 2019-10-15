@@ -108,7 +108,7 @@ fn main() {
         // Sup::Delete { id } => {
         //     sup::delete_path(id)
         // },
-        Sup::List { what } => {
+        Sup::List(what) => {
             match what {
                 PathsPipes::Paths => sup::list_paths(),
                 PathsPipes::Pipelines => sup::list_pipes(),
