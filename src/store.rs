@@ -126,6 +126,21 @@ pub fn read_files_file(file: PathBuf) -> Result<FilesStore, IoDbError> {
     Ok(file)
 }
 
+pub fn add_path(path: PathBuf, pipelines: Vec<String>) -> Result<(), IoDbError> {
+    let mut files = read_files_file(pipe_map_path())?;
+    
+    let new_id = files.files.iter()
+        .map(|x| x.id)
+        .max()
+        .unwrap_or(0) + 1;
+    println!("new: {}", new_id);
+
+    files.files.push(FileEntry { id: new_id, path: String::from(path.to_string_lossy()), pipes: pipelines });
+
+    Ok(())
+}
+
+
 pub fn list_paths() -> Result<Vec<FileEntry>, IoDbError> {
     Ok(read_files_file(pipe_map_path())?.files)
 }
@@ -134,10 +149,6 @@ pub fn list_pipelines() -> Result<Vec<PipelineRecord>, IoDbError> {
     let pipes: Vec<PipelineRecord> = Vec::new();
     Ok(pipes)
 }
-
-// pub fn add_path(path: PathBuf, pipelines: Vec<String>) -> Result<(), IoDbError> {
-//     let file = 
-// }
 
 // pub fn delete_path(id: u32)
 

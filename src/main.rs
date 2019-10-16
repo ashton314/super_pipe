@@ -114,6 +114,12 @@ fn main() {
                 PathsPipes::Pipelines => sup::list_pipes(),
             }
         },
+        Sup::Add(what) => {
+            match what {
+                AddPathPipe::Path { path, pipelines } => sup::add_path(path, pipelines),
+                AddPathPipe::Pipe { name: _ } => panic!("Unimplemented!")
+            }
+        },
         _ => panic!("Unmatched pattern: {:?}", opt)
     };
 }

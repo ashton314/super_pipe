@@ -1,21 +1,22 @@
 pub mod store;
+use std::path::PathBuf;
 //use std::process::Command;
 //use std::{str,fs};
 //use std::io::Write;
 
-// pub fn add_path(path: std::path::PathBuf, cmds: Vec<String>) {
-//     println!("Adding path: {:?}, pipelins: {:?}", path, cmds);
-//     match store::add_path(path, cmds) {
-//         Ok(_) => println!("Done."),
-//         Err(e) => {
-//             println!("There was a problem:");
-//             match e {
-//                 store::IoDbError::Db(_) => println!("Error from DB"),
-//                 _ => println!("{:?}", e)
-//             }
-//         }
-//     };
-// }
+pub fn add_path(path: PathBuf, pipes: Vec<String>) {
+    println!("Adding path: {:?}, pipelines: {:?}", path, pipes);
+    match store::add_path(path, pipes) {
+        Ok(_) => println!("Done."),
+        Err(e) => {
+            println!("There was a problem:");
+            match e {
+                store::IoDbError::Db(_) => println!("Error from DB"),
+                _ => println!("{:?}", e)
+            }
+        }
+    };
+}
 
 pub fn list_paths() {
     println!("Known paths:");
