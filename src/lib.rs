@@ -12,7 +12,7 @@ pub fn add_path(path: PathBuf, pipes: Vec<String>) {
             println!("There was a problem:");
             match e {
                 store::IoDbError::Db(_) => println!("Error from DB"),
-                _ => println!("{:?}", e)
+                _ => println!("\n{:?}", e)
             }
         }
     };

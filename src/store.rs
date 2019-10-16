@@ -111,6 +111,11 @@ impl From<toml::de::Error> for IoDbError {
         IoDbError::Db(err)
     }
 }
+// impl From<toml::ser::Error> for IoDbError {
+//     fn from(err: toml::ser::Error) -> IoDbError {
+//         IoDbError::Db(err)
+//     }
+// }
 
 impl From<std::io::Error> for IoDbError {
     fn from(err: std::io::Error) -> IoDbError {
@@ -126,6 +131,13 @@ pub fn read_files_file(file: PathBuf) -> Result<FilesStore, IoDbError> {
     Ok(file)
 }
 
+pub fn write_files_file(file: PathBuf, struct_to_store: FilesStore) -> Result<(), IoDbError> {
+    let mut fh = fs::File::create(file)?;
+    let contents = toml::to_string(&struct_to_store).expect("Couldn't serialize file store for some reason.");
+    fh.write(contents.as_bytes())?;
+    Ok(())
+}
+
 pub fn add_path(path: PathBuf, pipelines: Vec<String>) -> Result<(), IoDbError> {
     let mut files = read_files_file(pipe_map_path())?;
     
@@ -137,9 +149,8 @@ pub fn add_path(path: PathBuf, pipelines: Vec<String>) -> Result<(), IoDbError> 
 
     files.files.push(FileEntry { id: new_id, path: String::from(path.to_string_lossy()), pipes: pipelines });
 
-    Ok(())
+    write_files_file(pipe_map_path(), files)
 }
-
 
 pub fn list_paths() -> Result<Vec<FileEntry>, IoDbError> {
     Ok(read_files_file(pipe_map_path())?.files)
