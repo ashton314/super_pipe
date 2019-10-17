@@ -102,12 +102,6 @@ fn main() {
         //         None => println!("Run all pipelines not implemented yet!")
         //     }
         // },
-        // Sup::Add { path, commands: cmds } => {
-        //     sup::add_path(path, cmds)
-        // },
-        // Sup::Delete { id } => {
-        //     sup::delete_path(id)
-        // },
         Sup::List(what) => {
             match what {
                 PathsPipes::Paths => sup::list_paths(),
@@ -118,6 +112,12 @@ fn main() {
             match what {
                 AddPathPipe::Path { path, pipelines } => sup::add_path(path, pipelines),
                 AddPathPipe::Pipe { name: _ } => panic!("Unimplemented!")
+            }
+        },
+        Sup::Delete(what) => {
+            match what {
+                DeletePathPipe::Path { id } => sup::delete_path(id),
+                DeletePathPipe::Pipe { name: _ } => panic!("Unimplemented!")
             }
         },
         _ => panic!("Unmatched pattern: {:?}", opt)

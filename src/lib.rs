@@ -18,6 +18,20 @@ pub fn add_path(path: PathBuf, pipes: Vec<String>) {
     };
 }
 
+pub fn delete_path(id: u32) {
+    println!("Deleting path {:?}", id);
+    match store::delete_path(id) {
+        Ok(_) => println!("Done."),
+        Err(e) => {
+            println!("There was a problem:");
+            match e {
+                store::IoDbError::Db(_) => println!("Error from DB"),
+                _ => println!("\n{:?}", e)
+            }
+        }
+    };
+}
+
 pub fn list_paths() {
     println!("Known paths:");
     let paths = store::list_paths()
@@ -43,11 +57,6 @@ pub fn list_pipes() {
     }
 }
 
-
-// pub fn delete_path(id: u32) {
-//     println!("Deleting path {:?}", id);
-//     store::delete_path(id);
-// }
 
 // pub fn run_pipeline(id: u32) {
 //     let pipe = store::fetch_pipeline(id)

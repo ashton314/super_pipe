@@ -13,7 +13,7 @@ pub struct FilesStore {
     files: Vec<FileEntry>
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct FileEntry {
     pub id: u32,
     pub path: String,
@@ -161,7 +161,17 @@ pub fn list_pipelines() -> Result<Vec<PipelineRecord>, IoDbError> {
     Ok(pipes)
 }
 
-// pub fn delete_path(id: u32)
+pub fn delete_path(id: u32) -> Result<(), IoDbError> {
+    let mut files = read_files_file(pipe_map_path())?;
+
+    let new_file_store = files.files.iter()
+        .filter(|x| x.id != id)
+        .map(|x| x.clone())
+        .collect::<Vec<_>>();
+
+    files.files = new_file_store;
+    write_files_file(pipe_map_path(), files)
+}
 
 // pub fn fetch_pipeline(id: u32) -> Result<FileEntry, IoDbError>
 
