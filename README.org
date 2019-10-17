@@ -48,42 +48,20 @@ SuperPipe does keep state (right now using a SQLite database), so you will need 
 
 ** Config File
 
-*NOTE*: As of 2019-09-28 there are no config file mechanisms. Please see [[id:8C464D3F-E83E-4E1A-8799-4578F63BE69F][Add config file system]] for a better description. What you see below is a list of things to add configuration options for
+The config file lives in whatever the configuration file for your operating system is. On macOS this is =~/Library/Preferences/super_pipe=. On Linux this is =~/.config/=.
 
 *** To add
 
  - Where put the database
- - Use a SQLite database or a flat file system
 
 ** Command Line Interface
 
-*** Commands
+ - =init=
 
-**** =add <file> ["command" ...]=
+*** TODO Make the following commands work in this order:
 
-Add a file to the list of files to watch.
-
-The commands will have the name of the file inserted into the =$SUP_1= variable. You *will* need to escape it. For example, when wanting to copy my .emacs file from my home directory to Keybase, I would do:
-
-#+BEGIN_SRC bash
-
-  $ sup add ~/.emacs "cp \$SUP_1 /keybase/private/ashton314,.../"
-
-#+END_SRC
-
-Note that each path uniquely identifies the pipeline. The program will not allow you to add multiple pipelines with the same name.
-
-**** =list=
-
-List all pipes and their associated commands.
-
-**** =delete <id>=
-
-Delete a pipeline.
-
-**** TODO =sync <file1> <file2>=
-
-This will set up to keep two files in sync. Right now, I'm thinking I'll use a git repository to keep the files synchronized, handle merging, etc. I'll need a way to fail automatically, however.
+ - =pipe [add|delete|list]=
+ - =path [add|delete|list]=
 
 * Open Tasks
 
@@ -109,18 +87,12 @@ I just thought of a use case for two pipelines with one file: one task runs ever
    - State "DONE"       from "TODO"       [2019-10-10 Do 13:52]
    :END:
 
-** TODO Weigh benefits of using SQLite over plain files
-
-| SQLite advantages      | Plain-text file advantages                        |
-|------------------------+---------------------------------------------------|
-| Rare format corruption | Don't need another dependency[fn:1]               |
-| No tricky parsing      | Easier to parse than working with an SQL database |
-
 * General Notes
+** 2019-10-18
+
+I've decided to move away from SQLite because 1.) I can execute bash /files/ from Rust, but /strings/ are tricky; moving the pipelines into files is more ergonomic, and 2.) this is a 100% self-contained binary!
+
 ** 2019-09-23
 
 I think it would be cool if I could add some grantees to the program: what if I could make sure everything that happened was atomic? Maybe I say that all the commands run in a particular sandbox (e.g. in a directory with only the file in question present) than then run, then they define what products from the transformation they want to extract and put elsewhere. If any point of the pipeline fails, then they can roll it back.
 
-* Footnotes
-
-[fn:1] Though if I'm targeting macOS, it's already there. Should also come on most Linux distros/be really easy to install

@@ -6,7 +6,6 @@ use serde::{Serialize, Deserialize};
 use std::path::PathBuf;
 use std::fs;
 use std::io::prelude::*;
-// use toml::Value;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FilesStore {
@@ -131,8 +130,12 @@ pub fn read_files_file(file: PathBuf) -> Result<FilesStore, IoDbError> {
     let mut fh = fs::File::open(file)?;
     let mut contents = String::new();
     fh.read_to_string(&mut contents)?;
-    let file: FilesStore = toml::from_str(contents.as_str())?;
-    Ok(file)
+    if contents.len() == 0 {
+	Ok(FilesStore {files: Vec::new()})
+    } else {
+	let file: FilesStore = toml::from_str(contents.as_str())?;
+	Ok(file)
+    }
 }
 
 pub fn write_files_file(file: PathBuf, struct_to_store: FilesStore) -> Result<(), IoDbError> {
@@ -190,5 +193,13 @@ mod test {
     fn setup_works() {
         ensure_has_database();
         assert!(pipes_dir().exists(), "Directory for pipes was not created!");
+    }
+
+    #[test]
+    fn run_with_empty_file() {
+	let tmp_file = PathBuf::from("/tmp/super_pipe_test_file_will_be_killed");
+	let mut fh = fs::File::create(&tmp_file).unwrap();
+	fh.write(b"").unwrap();
+	assert_eq!(read_files_file(tmp_file).unwrap().files.len(), 0, "Somehow some files snuck in...")
     }
 }

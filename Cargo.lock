@@ -302,6 +302,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "sha1"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "strsim"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -333,6 +338,7 @@ version = "0.0.1"
 dependencies = [
  "dirs 2.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sha1 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "structopt 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "toml 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -452,6 +458,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum rustc-demangle 0.1.16 (registry+https://github.com/rust-lang/crates.io-index)" = "4c691c0e608126e00913e33f0ccf3727d5fc84573623b8d65b2df340b5201783"
 "checksum serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)" = "9796c9b7ba2ffe7a9ce53c2287dfc48080f4b2b362fcc245a259b3a7201119dd"
 "checksum serde_derive 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)" = "4b133a43a1ecd55d4086bd5b4dc6c1751c68b1bfbeba7a5040442022c7e7c02e"
+"checksum sha1 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "2579985fda508104f7587689507983eadd6a6e84dd35d6d115361f530916fa0d"
 "checksum strsim 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "8ea5119cdb4c55b55d432abb513a0429384878c15dde60cc77b1c99de1a95a6a"
 "checksum structopt 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)" = "6d4f66a4c0ddf7aee4677995697366de0749b0139057342eccbb609b12d0affc"
 "checksum structopt-derive 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)" = "8fe0c13e476b4e21ff7f5c4ace3818b6d7bdc16897c31c73862471bc1663acae"
