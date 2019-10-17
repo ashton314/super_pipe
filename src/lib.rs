@@ -39,7 +39,7 @@ pub fn list_paths() {
 
     for path in paths {
 	match path {
-	    store::FileEntry {id, path, pipes} => println!("{}\t{}\t{:?}", id, path, pipes),
+	    store::FileRecord {id, path, pipes} => println!("{}\t{}\t{:?}", id, path, pipes),
 	};
     }
 }

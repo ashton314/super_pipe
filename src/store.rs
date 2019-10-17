@@ -10,19 +10,23 @@ use std::io::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FilesStore {
-    files: Vec<FileEntry>
+    files: Vec<FileRecord>
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct FileEntry {
+pub struct FileRecord {
     pub id: u32,
     pub path: String,
     pub pipes: Vec<String>
 }
 
+pub struct PipelineStore {
+    pipes: Vec<PipelineRecord>
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PipelineRecord {
-    pub id: u32,
+    pub name: String,
     pub checksum: String,
     pub source: PathBuf
 }
@@ -147,12 +151,12 @@ pub fn add_path(path: PathBuf, pipelines: Vec<String>) -> Result<(), IoDbError> 
         .unwrap_or(0) + 1;
     println!("new: {}", new_id);
 
-    files.files.push(FileEntry { id: new_id, path: String::from(path.to_string_lossy()), pipes: pipelines });
+    files.files.push(FileRecord { id: new_id, path: String::from(path.to_string_lossy()), pipes: pipelines });
 
     write_files_file(pipe_map_path(), files)
 }
 
-pub fn list_paths() -> Result<Vec<FileEntry>, IoDbError> {
+pub fn list_paths() -> Result<Vec<FileRecord>, IoDbError> {
     Ok(read_files_file(pipe_map_path())?.files)
 }
 
@@ -173,9 +177,11 @@ pub fn delete_path(id: u32) -> Result<(), IoDbError> {
     write_files_file(pipe_map_path(), files)
 }
 
-// pub fn fetch_pipeline(id: u32) -> Result<FileEntry, IoDbError>
+pub fn add_pipeline(name: String, contents: String) {
+    
+}
 
-// pub fn list_paths<'a>() -> Result<Vec<Result<FileEntry, &'a str>>, &'a str>
+// pub fn fetch_pipeline(id: u32) -> Result<FileRecord, IoDbError>
 
 #[cfg(test)]
 mod test {
