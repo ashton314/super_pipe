@@ -1,11 +1,13 @@
 extern crate serde;
 extern crate toml;
 extern crate dirs;
+extern crate sha1;
 
 use serde::{Serialize, Deserialize};
 use std::path::PathBuf;
 use std::fs;
 use std::io::prelude::*;
+use sha1::Sha1;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FilesStore {
@@ -181,7 +183,11 @@ pub fn delete_path(id: u32) -> Result<(), IoDbError> {
 }
 
 pub fn add_pipeline(name: String, contents: String) {
-    
+    let checksum = Sha1::from(contents).hexdigest();
+    let mut source = pipes_dir();
+    source.push(checksum);
+    let record = PipelineRecord { name, checksum, source };
+
 }
 
 // pub fn fetch_pipeline(id: u32) -> Result<FileRecord, IoDbError>
