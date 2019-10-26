@@ -28,8 +28,7 @@ pub struct PipelineStore {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PipelineRecord {
     pub name: String,
-    pub checksum: String,
-    pub source: PathBuf
+    pub checksum: String
 }
 
 /// Return the root of the directory that we can own
@@ -128,6 +127,7 @@ impl From<std::io::Error> for IoDbError {
     }
 }
 
+// TODO: make this function accept a mutable destination of type FilesStore or PipelinesStore... or can I pass a *type* as a value?
 pub fn read_files_file(file: PathBuf) -> Result<FilesStore, IoDbError> {
     let mut fh = fs::File::open(file)?;
     let mut contents = String::new();
@@ -140,6 +140,7 @@ pub fn read_files_file(file: PathBuf) -> Result<FilesStore, IoDbError> {
     }
 }
 
+// TODO: make this accept something that implements the serialize trait
 pub fn write_files_file(file: PathBuf, struct_to_store: FilesStore) -> Result<(), IoDbError> {
     let mut fh = fs::File::create(file)?;
     let contents = toml::to_string(&struct_to_store).expect("Couldn't serialize file store for some reason.");
@@ -182,12 +183,27 @@ pub fn delete_path(id: u32) -> Result<(), IoDbError> {
     write_files_file(pipe_map_path(), files)
 }
 
-pub fn add_pipeline(name: String, contents: String) {
-    let checksum = Sha1::from(contents).hexdigest();
-    let mut source = pipes_dir();
-    source.push(checksum);
-    let record = PipelineRecord { name, checksum, source };
+/// Given a name and some contents, stores the contents under it's
+/// checksum and creates a new pipeline record and stores that.
+pub fn add_pipeline(name: String, contents: String) -> Result<(), IoDbError> {
+    let checksum: String = Sha1::from(&contents).digest().to_string();
+    write_to_pipe(&checksum, &contents)?;
 
+    let record = PipelineRecord { name, checksum };
+
+    // WORKING HERE
+
+
+    Ok(())
+}
+
+/// write_to_pipe just spews out data to a file in the pipes_dir()
+fn write_to_pipe(checksum: &String, contents: &String) -> Result<(), IoDbError> {
+    let mut source = pipes_dir(); source.push(checksum);
+    let mut fh = fs::File::create(source)?;
+
+    fh.write(contents.as_bytes())?;
+    Ok(())
 }
 
 // pub fn fetch_pipeline(id: u32) -> Result<FileRecord, IoDbError>
