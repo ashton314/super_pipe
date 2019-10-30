@@ -40,6 +40,7 @@ pub fn conf_dir() -> PathBuf {
     path
 }
 
+/// Returns the directory where all pipes are stored
 pub fn pipes_dir() -> PathBuf {
     let mut path = conf_dir();
     path.push("pipes");
@@ -55,7 +56,7 @@ pub fn pipe_map_path() -> PathBuf {
 }
 
 /// This returns the path to the file that keeps track of all the pipelines
-pub fn pipe_store_path() -> PathBuf {
+pub fn pipe_idx_path() -> PathBuf {
     let mut path = conf_dir();
     path.push("pipelines");
     path.set_extension("toml");
@@ -67,7 +68,7 @@ pub fn ensure_has_database() {
     let conf  = conf_dir();
     let pipes = pipes_dir();
     let fmp   = pipe_map_path();
-    let psp   = pipe_store_path();
+    let psp   = pipe_idx_path();
     if ! conf.exists() {
         fs::create_dir(&conf)
             .expect(format!("Could not create directory {:?} for some reason.", conf).as_str());
@@ -187,7 +188,7 @@ pub fn list_paths() -> Result<Vec<FileRecord>, IoDbError> {
 }
 
 pub fn list_pipelines() -> Result<Vec<PipelineRecord>, IoDbError> {
-    Ok(read_pipes_file(pipe_store_path())?.pipes)
+    Ok(read_pipes_file(pipe_idx_path())?.pipes)
 }
 
 pub fn delete_path(id: u32) -> Result<(), IoDbError> {
@@ -205,14 +206,13 @@ pub fn delete_path(id: u32) -> Result<(), IoDbError> {
 /// Given a name and some contents, stores the contents under it's
 /// checksum and creates a new pipeline record and stores that.
 pub fn add_pipeline(name: String, contents: String) -> Result<(), IoDbError> {
-    let pipes: Vec<PipelineRecord> = Vec::new();
+    let mut pipes = read_pipes_file(pipe_idx_path())?;
     let checksum: String = Sha1::from(&contents).digest().to_string();
     write_to_pipe(&checksum, &contents)?;
 
-    let record = PipelineRecord { name, checksum };
+    pipes.pipes.push(PipelineRecord { name, checksum });
 
-
-    Ok(())
+    write_struct_to_file(pipe_idx_path(), pipes)
 }
 
 /// write_to_pipe just spews out data to a file in the pipes_dir()
