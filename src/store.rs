@@ -26,7 +26,7 @@ pub struct FileRecord {
     pub pipes: Vec<String>
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PipelineRecord {
     pub name: String,
     pub checksum: String
@@ -224,8 +224,15 @@ fn write_to_pipe(checksum: &String, contents: &String) -> Result<(), IoDbError> 
     Ok(())
 }
 
-// pub fn fetch_pipeline(id: u32) -> Result<PipelineRecord, IoDbError> {
-// }
+pub fn fetch_pipeline(name: String) -> Result<Option<PipelineRecord>, IoDbError> {
+    let pipes = read_pipes_file(pipe_idx_path())?;
+    for record in pipes.pipes.iter() {
+	if name.eq(&record.name) {
+	    return Ok(Some(record.clone()))
+	}
+    }
+    Ok(None)
+}
 
 #[cfg(test)]
 mod test {

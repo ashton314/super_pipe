@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use std::io::{self, Read};
 use structopt::StructOpt;
 use super_pipe as sup;
 use sup::store as store;
@@ -99,7 +100,14 @@ fn main() {
         },
         Sup::Pipe(what) => {
             match what {
-                PipeCommands::Add { }
+                PipeCommands::Add { name } => {
+		    println!("Reading file from STDIN...");
+		    let mut contents = String::new();
+		    io::stdin().read_to_string(&mut contents).expect("Couldn't read STDIN");
+		    sup::add_pipe(name, contents)
+		},
+		PipeCommands::List => sup::list_pipes(),
+		_ => panic!("Unimplemented pattern: {:?}", what)
             }
         },
         _ => panic!("Unmatched pattern: {:?}", opt)

@@ -1,6 +1,7 @@
 pub mod store;
 use std::path::PathBuf;
-//use std::process::Command;
+use std::collections::HashMap;
+use std::process::Command;
 //use std::{str,fs};
 //use std::io::Write;
 
@@ -50,10 +51,7 @@ pub fn list_pipes() {
 	.expect("Was not able to get a list of pipelines for some reason.");
 
     for pipe in pipes {
-        println!("Pipeline: {:?}", pipe);
-	// match pipe {
-            
-	// };
+	println!("{}\t{}", pipe.name, pipe.checksum)
     }
 }
 
@@ -62,6 +60,15 @@ pub fn add_pipe(name: String, content: String) {
         Ok(_) => println!("Done."),
         Err(e) => println!("Problem adding pipeline: {:?}", e),
     };
+}
+
+pub fn run_pipeline(name: String, env: HashMap<String, String>) {
+    
+    let mut pipeline = store::pipes_dir();
+    pipeline.push(name);
+    if ! pipeline.exists() {
+	println!("")
+    }
 }
 
 // pub fn run_pipeline(id: u32) {
