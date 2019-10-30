@@ -14,15 +14,16 @@ pub struct FilesStore {
     files: Vec<FileRecord>
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PipelineStore {
+    pipes: Vec<PipelineRecord>
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct FileRecord {
     pub id: u32,
     pub path: String,
     pub pipes: Vec<String>
-}
-
-pub struct PipelineStore {
-    pipes: Vec<PipelineRecord>
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -53,11 +54,20 @@ pub fn pipe_map_path() -> PathBuf {
     path
 }
 
+/// This returns the path to the file that keeps track of all the pipelines
+pub fn pipe_store_path() -> PathBuf {
+    let mut path = conf_dir();
+    path.push("pipelines");
+    path.set_extension("toml");
+    path
+}
+
 /// Makes sure that there is a file store available
 pub fn ensure_has_database() {
-    let conf = conf_dir();
+    let conf  = conf_dir();
     let pipes = pipes_dir();
-    let fmp  = pipe_map_path();
+    let fmp   = pipe_map_path();
+    let psp   = pipe_store_path();
     if ! conf.exists() {
         fs::create_dir(&conf)
             .expect(format!("Could not create directory {:?} for some reason.", conf).as_str());
@@ -69,6 +79,10 @@ pub fn ensure_has_database() {
     if ! fmp.exists() {
         fs::File::create(&fmp)
             .expect(format!("Could not create new file map path at {:?} for some eason", fmp).as_str());
+    }
+    if ! psp.exists() {
+        fs::File::create(&psp)
+            .expect(format!("Could not create new pipe store path at {:?} for some eason", psp).as_str());
     }
 }
 
@@ -115,11 +129,6 @@ impl From<toml::de::Error> for IoDbError {
         IoDbError::Db(err)
     }
 }
-// impl From<toml::ser::Error> for IoDbError {
-//     fn from(err: toml::ser::Error) -> IoDbError {
-//         IoDbError::Db(err)
-//     }
-// }
 
 impl From<std::io::Error> for IoDbError {
     fn from(err: std::io::Error) -> IoDbError {
@@ -140,8 +149,19 @@ pub fn read_files_file(file: PathBuf) -> Result<FilesStore, IoDbError> {
     }
 }
 
-// TODO: make this accept something that implements the serialize trait
-pub fn write_files_file(file: PathBuf, struct_to_store: FilesStore) -> Result<(), IoDbError> {
+pub fn read_pipes_file(file: PathBuf) -> Result<PipelineStore, IoDbError> {
+    let mut fh = fs::File::open(file)?;
+    let mut contents = String::new();
+    fh.read_to_string(&mut contents)?;
+    if contents.len() == 0 {
+	Ok(PipelineStore { pipes: Vec::new()})
+    } else {
+	let file: PipelineStore = toml::from_str(contents.as_str())?;
+	Ok(file)
+    }
+}
+
+pub fn write_struct_to_file(file: PathBuf, struct_to_store: impl Serialize) -> Result<(), IoDbError> {
     let mut fh = fs::File::create(file)?;
     let contents = toml::to_string(&struct_to_store).expect("Couldn't serialize file store for some reason.");
     fh.write(contents.as_bytes())?;
@@ -159,7 +179,7 @@ pub fn add_path(path: PathBuf, pipelines: Vec<String>) -> Result<(), IoDbError> 
 
     files.files.push(FileRecord { id: new_id, path: String::from(path.to_string_lossy()), pipes: pipelines });
 
-    write_files_file(pipe_map_path(), files)
+    write_struct_to_file(pipe_map_path(), files)
 }
 
 pub fn list_paths() -> Result<Vec<FileRecord>, IoDbError> {
@@ -167,8 +187,7 @@ pub fn list_paths() -> Result<Vec<FileRecord>, IoDbError> {
 }
 
 pub fn list_pipelines() -> Result<Vec<PipelineRecord>, IoDbError> {
-    let pipes: Vec<PipelineRecord> = Vec::new();
-    Ok(pipes)
+    Ok(read_pipes_file(pipe_store_path())?.pipes)
 }
 
 pub fn delete_path(id: u32) -> Result<(), IoDbError> {
@@ -180,18 +199,17 @@ pub fn delete_path(id: u32) -> Result<(), IoDbError> {
         .collect::<Vec<_>>();
 
     files.files = new_file_store;
-    write_files_file(pipe_map_path(), files)
+    write_struct_to_file(pipe_map_path(), files)
 }
 
 /// Given a name and some contents, stores the contents under it's
 /// checksum and creates a new pipeline record and stores that.
 pub fn add_pipeline(name: String, contents: String) -> Result<(), IoDbError> {
+    let pipes: Vec<PipelineRecord> = Vec::new();
     let checksum: String = Sha1::from(&contents).digest().to_string();
     write_to_pipe(&checksum, &contents)?;
 
     let record = PipelineRecord { name, checksum };
-
-    // WORKING HERE
 
 
     Ok(())
