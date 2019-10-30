@@ -224,7 +224,8 @@ fn write_to_pipe(checksum: &String, contents: &String) -> Result<(), IoDbError> 
     Ok(())
 }
 
-// pub fn fetch_pipeline(id: u32) -> Result<FileRecord, IoDbError>
+// pub fn fetch_pipeline(id: u32) -> Result<PipelineRecord, IoDbError> {
+// }
 
 #[cfg(test)]
 mod test {

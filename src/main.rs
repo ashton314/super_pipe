@@ -9,63 +9,57 @@ enum Sup {
     /// Ensure config files are in place
     Init,
 
-    /// Add path watchers and pipelines
-    Add(AddPathPipe),
+    /// Path-related commands
+    Path(PathCommands),
+
+    /// Pipeline-related commands
+    Pipe(PipeCommands),
 
     /// Manually fire all (or one if specified) pipelines
-    Run {
-        id: Option<u32>
-    },
-
-    /// Remove a path watcher or pipeline
-    Delete(DeletePathPipe),
-
-    /// List paths and pipelines
-    List(PathsPipes),
+    Run,
 
     /// Configure super pipe
     Config(Config)
 }
 
 #[derive(Debug, StructOpt)]
-enum AddPathPipe {
-    /// Add a path watcher. <pipelines...> should be a list of either
-    /// ids or pipeline names. These will be run when <path> changes.
-    Path {
+enum PathCommands {
+    /// Add a path watcher. <pipelines...> should be a list of
+    /// pipeline names. These will be run when <path> changes.
+    Add {
         #[structopt(parse(from_os_str))]
         path: PathBuf,
         pipelines: Vec<String>
     },
+    
+    /// List all path watchers.
+    List,
+
+    /// Delete a path watcher. This does *not* remove the pipelines
+    /// that are associated with the path.
+    Delete {
+        id: u32
+    }
+}
+
+#[derive(Debug, StructOpt)]
+enum PipeCommands {
     /// Add a new pipeline. <name> should be a unique name to give
     /// this pipeline. This program then reads from STDIN and saves it
     /// to a file. You can then reference this pipeline by name or ID.
-    Pipe {
+    Add {
         name: String
-    }
-}
-
-#[derive(Debug, StructOpt)]
-enum DeletePathPipe {
-    /// Delete a path watcher. This does *not* remove the pipelines
-    /// that are associated with the path.
-    Path {
-        id: u32,
     },
+
+    /// List all pipelines
+    List,
+
     /// Delete a pipe. This will not delete or modify the path watcher
     /// that reference this pipeline. Instead, a warning will be
     /// triggered when they run.
-    Pipe {
+    Delete {
         name: String
     }
-}
-
-
-#[derive(Debug, StructOpt)]
-enum PathsPipes {
-    /// Display paths and their associated pipelines
-    Paths,
-    /// Display pipelines
-    Pipelines
 }
 
 #[derive(Debug, StructOpt)]
@@ -96,28 +90,16 @@ fn main() {
             store::init();
             println!("done.")
         },
-        // Sup::Run { id } => {
-        //     match id {
-        //         Some(num) => sup::run_pipeline(num),
-        //         None => println!("Run all pipelines not implemented yet!")
-        //     }
-        // },
-        Sup::List(what) => {
+        Sup::Path(what) => {
             match what {
-                PathsPipes::Paths => sup::list_paths(),
-                PathsPipes::Pipelines => sup::list_pipes(),
+                PathCommands::Add { path, pipelines } => sup::add_path(path, pipelines),
+                PathCommands::List => sup::list_paths(),
+                PathCommands::Delete { id } => sup::delete_path(id)
             }
         },
-        Sup::Add(what) => {
+        Sup::Pipe(what) => {
             match what {
-                AddPathPipe::Path { path, pipelines } => sup::add_path(path, pipelines),
-                AddPathPipe::Pipe { name: _ } => panic!("Unimplemented!")
-            }
-        },
-        Sup::Delete(what) => {
-            match what {
-                DeletePathPipe::Path { id } => sup::delete_path(id),
-                DeletePathPipe::Pipe { name: _ } => panic!("Unimplemented!")
+                PipeCommands::Add { }
             }
         },
         _ => panic!("Unmatched pattern: {:?}", opt)

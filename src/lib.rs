@@ -57,6 +57,12 @@ pub fn list_pipes() {
     }
 }
 
+pub fn add_pipe(name: String, content: String) {
+    match store::add_pipeline(name, content) {
+        Ok(_) => println!("Done."),
+        Err(e) => println!("Problem adding pipeline: {:?}", e),
+    };
+}
 
 // pub fn run_pipeline(id: u32) {
 //     let pipe = store::fetch_pipeline(id)
