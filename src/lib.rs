@@ -62,13 +62,33 @@ pub fn add_pipe(name: String, content: String) {
     };
 }
 
-pub fn run_pipeline(name: String, env: HashMap<String, String>) {
-    
+pub fn run_pipeline(name: &String, env: HashMap<String, String>) {
+    let record = match store::fetch_pipeline(name) {
+        Ok(thing) => match thing {
+            Some(r) => r,
+            None => {
+                println!("No pipeline matching name {}", name);
+                return
+            }
+        },
+        Err(e) => {
+            println!("Problem fetching record: {:?}", e);
+            return
+        }
+    };
+
     let mut pipeline = store::pipes_dir();
     pipeline.push(name);
     if ! pipeline.exists() {
-	println!("")
+	println!("Could not locate pipeline {} (hash: {})", name, record.checksum);
+        return
     }
+
+    Command::new("bash")
+        .args(&[pipeline])
+        .envs(&env)
+        .spawn()
+        .expect(format!("Problem running pipeline {}", name).as_str());
 }
 
 // pub fn run_pipeline(id: u32) {
