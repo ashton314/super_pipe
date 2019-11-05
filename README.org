@@ -13,17 +13,14 @@ This is a work in progress. See the [[id:BC7A7927-9189-4722-8020-A66050D09046][f
 
 ** Command-line Options
 
-All commands are run with =sup= in front.
+ - config :: Configure super pipe
+ - help :: Prints this message or the help of the given subcommand(s)
+ - init :: Ensure config files are in place
+ - path :: Path-related commands
+ - pipe :: Pipeline-related commands
+ - run :: Manually fire all (or one if specified) pipelines
 
- - =init= Ensures configuration files are set up properly
- - =status= *WIP*
- - =config= *WIP*
- - =add <pathname>= Add a pipeline with a watched file
- - =delete <id>= Remove a pipeline
- - =list= List files currently being watched
- - =sync <path1> <path2>= Keep two files sync'd. Uses Git's merge algorithm to resolve differences.
- - =lens <path1> [cmds ...] --path2 <path2> [cmds ...]= *WIP* Create a round-trip transformation preserving pipeline
- - =run [id]= *WIP* Manually fire off a pipeline (or all pipelines)
+Run =sup <cmd> help= for more information on any one of the commands.
 
 * Description
 
@@ -36,13 +33,13 @@ SuperPipe does keep state (right now using a SQLite database), so you will need 
   :ID:       BC7A7927-9189-4722-8020-A66050D09046
   :END:
 
-| Status      | Feature                            | Notes                             |
-|-------------+------------------------------------+-----------------------------------|
-| IN PROGRESS | CRUD paths to manage               |                                   |
-| TODO        | Add file system watcher            |                                   |
-| TODO        | Add cron-like support              |                                   |
-| TODO        | Add round-trip detection           | This might become its own command |
-| TODO        | Use git to resolve merge conflicts |                                   |
+| Status | Feature                            | Notes                             |
+|--------+------------------------------------+-----------------------------------|
+| DONE   | CRUD paths to manage               |                                   |
+| TODO   | Add file system watcher            |                                   |
+| TODO   | Add cron-like support              |                                   |
+| TODO   | Add round-trip detection           | This might become its own command |
+| TODO   | Use git to resolve merge conflicts |                                   |
 
 * Documentation
 
@@ -58,11 +55,6 @@ The config file lives in whatever the configuration file for your operating syst
 
  - =init=
 
-*** TODO Make the following commands work in this order:
-
- - =pipe [add|delete|list]=
- - =path [add|delete|list]=
-
 * Open Tasks
 
 ** DONE Operations need to operate on pipe ID, not on file name
@@ -73,8 +65,10 @@ The config file lives in whatever the configuration file for your operating syst
 
 I just thought of a use case for two pipelines with one file: one task runs every time a file changes, another happens daily. Same file, two different pipelines.
 
-** IN_PROGRESS CRUD paths
+** DONE CRUD paths
+   CLOSED: [2019-11-05 Di 19:03]
    :LOGBOOK:
+   - State "DONE"       from "IN_PROGRESS" [2019-11-05 Di 19:03]
    - State "IN_PROGRESS" from "TODO"       [2019-09-28 Sat 20:19]
    :END:
 
