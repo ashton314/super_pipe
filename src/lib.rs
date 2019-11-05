@@ -47,7 +47,18 @@ pub fn list_paths() {
 
 pub fn run_path(id: u32) {
     // First, get a path
-    
+    let fr: store::FileRecord = match store::get_path(id) {
+        Err(e) => { println!("Problem fetching file details: {:?}", e); return },
+        Ok(None) => { println!("No file with id {} found", id); return },
+        Ok(Some(f)) => f
+    };
+
+    let mut env: HashMap<String, String> = HashMap::new();
+    env.insert("SUP_SRC".to_string(), fr.path);
+
+    for pipe in fr.pipes.iter() {
+        run_pipeline(pipe, &env)
+    }
 }
 
 pub fn list_pipes() {
@@ -68,7 +79,7 @@ pub fn add_pipe(name: String, content: String) {
 }
 
 /// Given a FileEntry, run all it's pipelines
-pub fn run_pipeline(name: &String, env: HashMap<String, String>) {
+pub fn run_pipeline(name: &String, env: &HashMap<String, String>) {
     let record = match store::fetch_pipeline(name) {
         Ok(thing) => match thing {
             Some(r) => r,
@@ -92,7 +103,7 @@ pub fn run_pipeline(name: &String, env: HashMap<String, String>) {
 
     Command::new("bash")
         .args(&[pipeline])
-        .envs(&env)
+        .envs(env)
         .spawn()
         .expect(format!("Problem running pipeline {}", name).as_str());
 }

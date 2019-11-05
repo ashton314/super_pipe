@@ -187,7 +187,7 @@ pub fn list_paths() -> Result<Vec<FileRecord>, IoDbError> {
     Ok(read_files_file(pipe_map_path())?.files)
 }
 
-pub fn get_paths(id: u32) -> Result<Option<FileRecord>, IoDbError> {
+pub fn get_path(id: u32) -> Result<Option<FileRecord>, IoDbError> {
     let paths = list_paths()?;
     for path in paths.iter() {
 	if path.id == id {
