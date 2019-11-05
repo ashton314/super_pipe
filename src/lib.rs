@@ -95,7 +95,7 @@ pub fn run_pipeline(name: &String, env: &HashMap<String, String>) {
     };
 
     let mut pipeline = store::pipes_dir();
-    pipeline.push(name);
+    pipeline.push(&record.checksum);
     if ! pipeline.exists() {
 	println!("Could not locate pipeline {} (hash: {})", name, record.checksum);
         return
