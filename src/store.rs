@@ -187,6 +187,16 @@ pub fn list_paths() -> Result<Vec<FileRecord>, IoDbError> {
     Ok(read_files_file(pipe_map_path())?.files)
 }
 
+pub fn get_paths(id: u32) -> Result<Option<FileRecord>, IoDbError> {
+    let paths = list_paths()?;
+    for path in paths.iter() {
+	if path.id == id {
+	    return Ok(Some(path.clone()))
+	}
+    }
+    Ok(None)
+}
+
 pub fn list_pipelines() -> Result<Vec<PipelineRecord>, IoDbError> {
     Ok(read_pipes_file(pipe_idx_path())?.pipes)
 }

@@ -36,6 +36,11 @@ enum PathCommands {
     /// List all path watchers.
     List,
 
+    /// Run pipelines associated with a file (or all files if none specified)
+    Run {
+	id: Option<u32>,
+    },
+
     /// Delete a path watcher. This does *not* remove the pipelines
     /// that are associated with the path.
     Delete {
@@ -95,7 +100,11 @@ fn main() {
             match what {
                 PathCommands::Add { path, pipelines } => sup::add_path(path, pipelines),
                 PathCommands::List => sup::list_paths(),
-                PathCommands::Delete { id } => sup::delete_path(id)
+                PathCommands::Delete { id } => sup::delete_path(id),
+		PathCommands::Run { id: maybe_id } => match maybe_id {
+		    None => println!("Running all paths not yet implemented!"),
+		    Some(id) => sup::run_path(id)
+		}
             }
         },
         Sup::Pipe(what) => {

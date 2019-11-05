@@ -45,6 +45,11 @@ pub fn list_paths() {
     }
 }
 
+pub fn run_path(id: u32) {
+    // First, get a path
+    
+}
+
 pub fn list_pipes() {
     println!("Pipelines:");
     let pipes = store::list_pipelines()
@@ -62,6 +67,7 @@ pub fn add_pipe(name: String, content: String) {
     };
 }
 
+/// Given a FileEntry, run all it's pipelines
 pub fn run_pipeline(name: &String, env: HashMap<String, String>) {
     let record = match store::fetch_pipeline(name) {
         Ok(thing) => match thing {
