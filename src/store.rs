@@ -19,12 +19,25 @@ pub struct PipelineStore {
     pipes: Vec<PipelineRecord>
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SyncStore {
+    syncs: Vec<SyncRecord>
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct FileRecord {
     pub id: u32,
     pub path: String,
     pub pipes: Vec<String>
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SyncRecord {
+    pub id: u32,
+    pub path1: String,
+    pub path2: String
+}
+
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PipelineRecord {
@@ -63,27 +76,31 @@ pub fn pipe_idx_path() -> PathBuf {
     path
 }
 
+/// This returns the path to the file that keeps track of all the synced files
+pub fn sync_idx_path() -> PathBuf {
+    let mut path = conf_dir();
+    path.push("syncs");
+    path.set_extension("toml");
+    path
+}
+
 /// Makes sure that there is a file store available
 pub fn ensure_has_database() {
-    let conf  = conf_dir();
-    let pipes = pipes_dir();
-    let fmp   = pipe_map_path();
-    let psp   = pipe_idx_path();
-    if ! conf.exists() {
-        fs::create_dir(&conf)
-            .expect(format!("Could not create directory {:?} for some reason.", conf).as_str());
+    let dirs  = vec!(conf_dir(), pipes_dir());
+    let files = vec!(pipe_map_path(), pipe_idx_path(), sync_idx_path());
+
+    for dir in dirs.iter() {
+        if ! dir.exists() {
+            fs::create_dir(dir)
+                .expect(format!("Could not create directory {:?} for some reason.", dir).as_str());
+        }
     }
-    if ! pipes.exists() {
-        fs::create_dir(&pipes)
-            .expect(format!("Could not create directory {:?} for some reason.", conf).as_str());
-    }
-    if ! fmp.exists() {
-        fs::File::create(&fmp)
-            .expect(format!("Could not create new file map path at {:?} for some eason", fmp).as_str());
-    }
-    if ! psp.exists() {
-        fs::File::create(&psp)
-            .expect(format!("Could not create new pipe store path at {:?} for some eason", psp).as_str());
+
+    for file in files.iter() {
+        if ! file.exists() {
+            fs::File::create(file)
+                .expect(format!("Could not create file {:?} for some reason.", file).as_str());
+        }
     }
 }
 
@@ -137,7 +154,6 @@ impl From<std::io::Error> for IoDbError {
     }
 }
 
-// TODO: make this function accept a mutable destination of type FilesStore or PipelinesStore... or can I pass a *type* as a value?
 pub fn read_files_file(file: PathBuf) -> Result<FilesStore, IoDbError> {
     let mut fh = fs::File::open(file)?;
     let mut contents = String::new();
@@ -158,6 +174,18 @@ pub fn read_pipes_file(file: PathBuf) -> Result<PipelineStore, IoDbError> {
 	Ok(PipelineStore { pipes: Vec::new()})
     } else {
 	let file: PipelineStore = toml::from_str(contents.as_str())?;
+	Ok(file)
+    }
+}
+
+pub fn read_syncs_file(file: PathBuf) -> Result<SyncStore, IoDbError> {
+    let mut fh = fs::File::open(file)?;
+    let mut contents = String::new();
+    fh.read_to_string(&mut contents)?;
+    if contents.len() == 0 {
+	Ok(SyncStore { syncs: Vec::new() })
+    } else {
+	let file: SyncStore = toml::from_str(contents.as_str())?;
 	Ok(file)
     }
 }
