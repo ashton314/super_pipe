@@ -3,9 +3,10 @@ use std::path::PathBuf;
 use std::collections::HashMap;
 use std::process::Command;
 
-use notify::{Watcher, RecursiveMode, watcher};
+use notify::{Watcher, RecursiveMode, watcher, DebouncedEvent};
 use std::sync::mpsc::channel;
 use std::time::Duration;
+use std::thread;
 
 pub fn watch() {
     // First, gather all paths
@@ -23,7 +24,24 @@ pub fn watch() {
 
     loop {
         match rx.recv() {
-            Ok(e) => { println!("Got event: {:?}", e)},
+            Ok(e) => {
+		println!("Got event: {:?}", e);
+		thread::spawn(move || {
+		    match e {
+			DebouncedEvent::Remove(path) => println!("Can't do anything to {:?} because it got removed", path),
+			DebouncedEvent::Write(path) => {
+			    println!("Got a write {:?}", path);
+			    run_path(path.to_str().unwrap());
+			},
+			DebouncedEvent::Create(path) => {
+			    println!("Got a create {:?}", path);
+			    run_path(path.to_str().unwrap());
+			},
+			_ => println!("Some other notification occured.")
+		    }
+		});
+		// FIXME: do something with the exit code
+	    },
             Err(e) => { println!("Got error: {:?}", e)}
         }
     }
@@ -69,11 +87,11 @@ pub fn list_paths() {
     }
 }
 
-pub fn run_path(id: u32) {
+pub fn run_path(name: &str) {
     // First, get a path
-    let fr: store::FileRecord = match store::get_path(id) {
+    let fr: store::FileRecord = match store::get_path(name) {
         Err(e) => { println!("Problem fetching file details: {:?}", e); return },
-        Ok(None) => { println!("No file with id {} found", id); return },
+        Ok(None) => { println!("No file {} found", name); return },
         Ok(Some(f)) => f
     };
 
