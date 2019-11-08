@@ -2,8 +2,32 @@ pub mod store;
 use std::path::PathBuf;
 use std::collections::HashMap;
 use std::process::Command;
-//use std::{str,fs};
-//use std::io::Write;
+
+use notify::{Watcher, RecursiveMode, watcher};
+use std::sync::mpsc::channel;
+use std::time::Duration;
+
+pub fn watch() {
+    // First, gather all paths
+    let paths = store::list_paths()
+        .expect("Was not able to get a list of paths to watch.");
+
+    // This is the channel on which we will receive notifications
+    // about fs events.
+    let (tx, rx) = channel();
+
+    let mut watcher = watcher(tx, Duration::from_secs(5)).unwrap();
+    for path in paths {
+        watcher.watch(path.path, RecursiveMode::NonRecursive).unwrap();
+    }
+
+    loop {
+        match rx.recv() {
+            Ok(e) => { println!("Got event: {:?}", e)},
+            Err(e) => { println!("Got error: {:?}", e)}
+        }
+    }
+}
 
 pub fn add_path(path: PathBuf, pipes: Vec<String>) {
     println!("Adding path: {:?}, pipelines: {:?}", path, pipes);

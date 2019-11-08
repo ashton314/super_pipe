@@ -19,6 +19,9 @@ enum Sup {
     /// Manually fire all (or one if specified) pipelines
     Run,
 
+    /// Watch all paths for changes
+    Watch,
+
     /// Configure super pipe
     Config(Config)
 }
@@ -118,6 +121,10 @@ fn main() {
 		PipeCommands::List => sup::list_pipes(),
 		_ => panic!("Unimplemented pattern: {:?}", what)
             }
+        },
+        Sup::Watch => {
+            println!("Firing off file system watcher...");
+            sup::watch()
         },
         _ => panic!("Unmatched pattern: {:?}", opt)
     };
