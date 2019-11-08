@@ -19,6 +19,7 @@ This is a work in progress. See the [[id:BC7A7927-9189-4722-8020-A66050D09046][f
  - path :: Path-related commands
  - pipe :: Pipeline-related commands
  - run :: Manually fire all (or one if specified) pipelines
+ - watch :: Watch all paths and run pipelines when the path changes (write and create events)
 
 Run =sup <cmd> help= for more information on any one of the commands.
 
